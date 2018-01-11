@@ -20,7 +20,7 @@ import numpy as np
 #os.chdir('/home/daniel/Documents/python')
 #os.chdir('/home/marius/Dropbox/TUD_Gerrit_Marius_Nils_Daniel/Python/SEC')
 #os.chdir('/home/lars/Dropbox/Finance/sec_crawler/') #Linux-Rechner
-os.chdir('C:/Users/Lars Poppe/Dropbox/Finance/sec_crawler/') #Windows-Rechner
+#os.chdir('C:/Users/Lars Poppe/Dropbox/Finance/sec_crawler/') #Windows-Rechner
 
 data_path = 'data/'
 output_path = 'output/'
@@ -219,9 +219,10 @@ def find_all_defs(cik):
 
 # Load Data (old + new)
 data = load_data()
+data = data.dropna(axis=0) # remove Rows with Company NaN or CIK NaN
 counter = 0
 save = True
-save_period = 10
+save_period = 2
 defaults = []
 ciks_used_list = []
 
@@ -231,7 +232,9 @@ print("Progress so far:", start, " / ", len(data))
 data_ = data['cik_number'][start:]
 
 for i, cik in enumerate(data_):
-
+    
+    ciks_used_list.append(cik) 
+    
     if counter % 1000 == 0:
         print(datetime.datetime.now())
     counter += 1
@@ -247,7 +250,7 @@ for i, cik in enumerate(data_):
             [defaults.append(tmp2) for tmp2 in tmp]
     
 
-    ciks_used_list.append(cik)     
+        
    
     # Save Data every 10 minutes to avoid data loss
     if datetime.datetime.now().minute % save_period == 0 and save:
@@ -274,8 +277,15 @@ for i, cik in enumerate(data_):
             f.close()
             
         print("Saved: defaults, ciks_used.")
+        
+        ciks_used_list = []
+        defaults = []
+        
+        print("Cleared ciks_used and defaults list.")
         save = False
         
     if datetime.datetime.now().minute % save_period != 0:
         save = True
           
+# Upload data to FTP (wp.firrm.de)
+# upload_file.py
